@@ -6,16 +6,16 @@ root = Tk()
 root.geometry("300x1000")  
 
 # Определяем переменные
-r_var = DoubleVar() 
-g_var = DoubleVar()
-b_var = DoubleVar() 
-c_var = DoubleVar()
-m_var = DoubleVar() 
-y_var = DoubleVar()
-k_var = DoubleVar() 
-h_var = DoubleVar()
-s_var = DoubleVar()
-v_var = DoubleVar()
+r_var = IntVar() 
+g_var = IntVar()
+b_var = IntVar() 
+c_var = IntVar()
+m_var = IntVar() 
+y_var = IntVar()
+k_var = IntVar() 
+h_var = IntVar()
+s_var = IntVar()
+v_var = IntVar()
 
 def rgb_to_cmyk(r, g, b):
     r_, g_, b_ = r / 255, g / 255, b / 255
@@ -168,22 +168,51 @@ h_scalar = Scale(root, variable=h_var, from_=0, to=360, orient=HORIZONTAL, label
 s_scalar = Scale(root, variable=s_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - S') 
 v_scalar = Scale(root, variable=v_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - V')    
 
+# Добавляем поля ввода для каждого цвета
+r_entry = Entry(root, textvariable=r_var)
+g_entry = Entry(root, textvariable=g_var)
+b_entry = Entry(root, textvariable=b_var)
+c_entry = Entry(root, textvariable=c_var)
+m_entry = Entry(root, textvariable=m_var)
+y_entry = Entry(root, textvariable=y_var)
+k_entry = Entry(root, textvariable=k_var)
+h_entry = Entry(root, textvariable=h_var)
+s_entry = Entry(root, textvariable=s_var)
+v_entry = Entry(root, textvariable=v_var)
+
 # Кнопка для выбора цвета
 color_button = Button(root, text="Выбрать цвет", command=choose_color, bg="lightblue")
 color_button.pack(pady=10)
 
-
-
 # Располагаем элементы
 r_scalar.pack(anchor=CENTER) 
+r_entry.pack(anchor=CENTER)
+
 g_scalar.pack(anchor=CENTER)  
+g_entry.pack(anchor=CENTER)
+
 b_scalar.pack(anchor=CENTER)  
+b_entry.pack(anchor=CENTER)
+
 c_scalar.pack(anchor=CENTER)  
+c_entry.pack(anchor=CENTER)
+
 m_scalar.pack(anchor=CENTER)  
+m_entry.pack(anchor=CENTER)
+
 y_scalar.pack(anchor=CENTER)  
-k_scalar.pack(anchor=CENTER)
+y_entry.pack(anchor=CENTER)
+
+k_scalar.pack(anchor=CENTER)  
+k_entry.pack(anchor=CENTER)
+
 h_scalar.pack(anchor=CENTER)  
+h_entry.pack(anchor=CENTER)
+
 s_scalar.pack(anchor=CENTER)  
+s_entry.pack(anchor=CENTER)
+
 v_scalar.pack(anchor=CENTER)    
+v_entry.pack(anchor=CENTER)
 
 root.mainloop()
