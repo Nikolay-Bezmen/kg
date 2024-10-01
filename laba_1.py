@@ -2,17 +2,17 @@ from tkinter import *
 from tkinter import colorchooser
 
 # Создаем интерфейс
-root = Tk()   
-root.geometry("300x1000")  
+root = Tk()
+root.geometry("300x1000")
 
 # Определяем переменные
-r_var = IntVar() 
+r_var = IntVar()
 g_var = IntVar()
-b_var = IntVar() 
+b_var = IntVar()
 c_var = IntVar()
-m_var = IntVar() 
+m_var = IntVar()
 y_var = IntVar()
-k_var = IntVar() 
+k_var = IntVar()
 h_var = IntVar()
 s_var = IntVar()
 v_var = IntVar()
@@ -131,9 +131,8 @@ def update_hsv(*args):
     y_var.set(y * 100)
     k_var.set(k * 100)
 
-def choose_color():
-    # Открыть диалог выбора цвета
-    color_code = colorchooser.askcolor(title="Выберите цвет")
+def choose_rgb_color():
+    color_code = colorchooser.askcolor(title="Выберите цвет (RGB)")
     if color_code[0]:  # Если пользователь выбрал цвет
         r, g, b = int(color_code[0][0]), int(color_code[0][1]), int(color_code[0][2])
         r_var.set(r)
@@ -141,6 +140,29 @@ def choose_color():
         b_var.set(b)
 
         update_rgb()
+
+def choose_cmyk_color():
+    color_code = colorchooser.askcolor(title="Выберите цвет (CMYK)")
+    if color_code[0]:  # Если пользователь выбрал цвет
+        r, g, b = int(color_code[0][0]), int(color_code[0][1]), int(color_code[0][2])
+        c, m, y, k = rgb_to_cmyk(r, g, b)
+        c_var.set(c * 100)
+        m_var.set(m * 100)
+        y_var.set(y * 100)
+        k_var.set(k * 100)
+
+        update_cmyk()
+
+def choose_hsv_color():
+    color_code = colorchooser.askcolor(title="Выберите цвет (HSV)")
+    if color_code[0]:  # Если пользователь выбрал цвет
+        r, g, b = int(color_code[0][0]), int(color_code[0][1]), int(color_code[0][2])
+        h, s, v = rgb_to_hsv(r, g, b)
+        h_var.set(h)
+        s_var.set(s * 100)
+        v_var.set(v * 100)
+
+        update_hsv()
 
 # Привязываем обновление к переменным
 r_var.trace("w", update_rgb)
@@ -158,15 +180,15 @@ v_var.trace("w", update_hsv)
 
 # Создаем ползунки
 r_scalar = Scale(root, variable=r_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - R')
-g_scalar = Scale(root, variable=g_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - G') 
-b_scalar = Scale(root, variable=b_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - B') 
-c_scalar = Scale(root, variable=c_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - C') 
-m_scalar = Scale(root, variable=m_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - M') 
-y_scalar = Scale(root, variable=y_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - Y') 
-k_scalar = Scale(root, variable=k_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - K') 
-h_scalar = Scale(root, variable=h_var, from_=0, to=360, orient=HORIZONTAL, label='HSV - H')  
-s_scalar = Scale(root, variable=s_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - S') 
-v_scalar = Scale(root, variable=v_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - V')    
+g_scalar = Scale(root, variable=g_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - G')
+b_scalar = Scale(root, variable=b_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - B')
+c_scalar = Scale(root, variable=c_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - C')
+m_scalar = Scale(root, variable=m_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - M')
+y_scalar = Scale(root, variable=y_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - Y')
+k_scalar = Scale(root, variable=k_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - K')
+h_scalar = Scale(root, variable=h_var, from_=0, to=360, orient=HORIZONTAL, label='HSV - H')
+s_scalar = Scale(root, variable=s_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - S')
+v_scalar = Scale(root, variable=v_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - V')
 
 # Добавляем поля ввода для каждого цвета
 r_entry = Entry(root, textvariable=r_var)
@@ -180,39 +202,40 @@ h_entry = Entry(root, textvariable=h_var)
 s_entry = Entry(root, textvariable=s_var)
 v_entry = Entry(root, textvariable=v_var)
 
-# Кнопка для выбора цвета
-color_button = Button(root, text="Выбрать цвет", command=choose_color, bg="lightblue")
-color_button.pack(pady=10)
+# Кнопки для выбора цвета
+rgb_button = Button(root, text="Выбрать цвет RGB", command=choose_rgb_color)
+cmyk_button = Button(root, text="Выбрать цвет CMYK", command=choose_cmyk_color)
+hsv_button = Button(root, text="Выбрать цвет HSV", command=choose_hsv_color)
 
-# Располагаем элементы
-r_scalar.pack(anchor=CENTER) 
-r_entry.pack(anchor=CENTER)
+# Расположение элементов на экране
+r_scalar.pack()
+g_scalar.pack()
+b_scalar.pack()
+rgb_button.pack()
 
-g_scalar.pack(anchor=CENTER)  
-g_entry.pack(anchor=CENTER)
+c_scalar.pack()
+m_scalar.pack()
+y_scalar.pack()
+k_scalar.pack()
+cmyk_button.pack()
 
-b_scalar.pack(anchor=CENTER)  
-b_entry.pack(anchor=CENTER)
+h_scalar.pack()
+s_scalar.pack()
+v_scalar.pack()
+hsv_button.pack()
 
-c_scalar.pack(anchor=CENTER)  
-c_entry.pack(anchor=CENTER)
+r_entry.pack()
+g_entry.pack()
+b_entry.pack()
 
-m_scalar.pack(anchor=CENTER)  
-m_entry.pack(anchor=CENTER)
+c_entry.pack()
+m_entry.pack()
+y_entry.pack()
+k_entry.pack()
 
-y_scalar.pack(anchor=CENTER)  
-y_entry.pack(anchor=CENTER)
+h_entry.pack()
+s_entry.pack()
+v_entry.pack()
 
-k_scalar.pack(anchor=CENTER)  
-k_entry.pack(anchor=CENTER)
-
-h_scalar.pack(anchor=CENTER)  
-h_entry.pack(anchor=CENTER)
-
-s_scalar.pack(anchor=CENTER)  
-s_entry.pack(anchor=CENTER)
-
-v_scalar.pack(anchor=CENTER)    
-v_entry.pack(anchor=CENTER)
-
+# Запускаем главный цикл
 root.mainloop()
