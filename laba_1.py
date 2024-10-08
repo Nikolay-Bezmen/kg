@@ -1,241 +1,217 @@
-from tkinter import *
+import tkinter as tk
 from tkinter import colorchooser
+from tkinter import ttk
+import colorsys
 
-# Создаем интерфейс
-root = Tk()
-root.geometry("300x1000")
+def update_from_rgb():
+    r = r_value.get()
+    g = g_value.get()
+    b = b_value.get()
 
-# Определяем переменные
-r_var = IntVar()
-g_var = IntVar()
-b_var = IntVar()
-c_var = IntVar()
-m_var = IntVar()
-y_var = IntVar()
-k_var = IntVar()
-h_var = IntVar()
-s_var = IntVar()
-v_var = IntVar()
+    c, m, y, k = rgb_to_cmyk(r, g, b)
+    c_value.set(c)
+    m_value.set(m)
+    y_value.set(y)
+    k_value.set(k)
+
+    h, s, v = rgb_to_hsv(r, g, b)
+    h_value.set(h)
+    s_value.set(s)
+    v_value.set(v)
+
+    update_color_display(r, g, b)
+
+def update_from_cmyk():
+    c = c_value.get()
+    m = m_value.get()
+    y = y_value.get()
+    k = k_value.get()
+
+    r, g, b = cmyk_to_rgb(c, m, y, k)
+    r_value.set(r)
+    g_value.set(g)
+    b_value.set(b)
+
+    h, s, v = rgb_to_hsv(r, g, b)
+    h_value.set(h)
+    s_value.set(s)
+    v_value.set(v)
+
+    update_color_display(r, g, b)
+
+def update_from_hsv():
+    h = h_value.get()
+    s = s_value.get()
+    v = v_value.get()
+
+    r, g, b = hsv_to_rgb(h, s, v)
+    r_value.set(r)
+    g_value.set(g)
+    b_value.set(b)
+
+    c, m, y, k = rgb_to_cmyk(r, g, b)
+    c_value.set(c)
+    m_value.set(m)
+    y_value.set(y)
+    k_value.set(k)
+
+    update_color_display(r, g, b)
 
 def rgb_to_cmyk(r, g, b):
-    r_, g_, b_ = r / 255, g / 255, b / 255
-    k = 1 - max(r_, g_, b_)
-    
-    if k == 1:
-        return 0, 0, 0, 1  # Черный цвет
-    
-    c = (1 - r_ - k) / (1 - k)
-    m = (1 - g_ - k) / (1 - k)
-    y = (1 - b_ - k) / (1 - k)
+    if (r, g, b) == (0, 0, 0):
+        return 0, 0, 0, 1
 
-    return c, m, y, k
+    r_prime = r / 255
+    g_prime = g / 255
+    b_prime = b / 255
+
+    k = 1 - max(r_prime, g_prime, b_prime)
+
+    if k == 1:
+        return 0, 0, 0, 1
+    
+    c = (1 - r_prime - k) / (1 - k)
+    m = (1 - g_prime - k) / (1 - k)
+    y = (1 - b_prime - k) / (1 - k)
+
+    return round(c, 2), round(m, 2), round(y, 2), round(k, 2)
 
 def cmyk_to_rgb(c, m, y, k):
     r = 255 * (1 - c) * (1 - k)
     g = 255 * (1 - m) * (1 - k)
     b = 255 * (1 - y) * (1 - k)
 
-    return r, g, b
+    return int(r), int(g), int(b)
 
 def rgb_to_hsv(r, g, b):
-    r_, g_, b_ = r / 255, g / 255, b / 255
-    c_max = max(r_, g_, b_)
-    c_min = min(r_, g_, b_)
-    delta = c_max - c_min
-
-    if delta == 0:
-        h = 0
-    elif c_max == r_:
-        h = (60 * ((g_ - b_) / delta) + 360) % 360
-    elif c_max == g_:
-        h = (60 * ((b_ - r_) / delta) + 120) % 360
-    else:
-        h = (60 * ((r_ - g_) / delta) + 240) % 360
-
-    s = 0 if c_max == 0 else (delta / c_max)
-    v = c_max
-
-    return h, s * 100, v * 100
+    h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+    return round(h * 360, 2), round(s * 100, 2), round(v * 100, 2)
 
 def hsv_to_rgb(h, s, v):
-    s /= 100
-    v /= 100
-    c = v * s
-    x = c * (1 - abs((h / 60) % 2 - 1))
-    m = v - c
+    r, g, b = colorsys.hsv_to_rgb(h / 360, s / 100, v / 100)
+    return int(r * 255), int(g * 255), int(b * 255)
 
-    if 0 <= h < 60:
-        r_, g_, b_ = c, x, 0
-    elif 60 <= h < 120:
-        r_, g_, b_ = x, c, 0
-    elif 120 <= h < 180:
-        r_, g_, b_ = 0, c, x
-    elif 180 <= h < 240:
-        r_, g_, b_ = 0, x, c
-    elif 240 <= h < 300:
-        r_, g_, b_ = x, 0, c
-    else:
-        r_, g_, b_ = c, 0, x
+def choose_color():
+    color_code = colorchooser.askcolor(title="Choose color")[0]
+    if color_code:
+        r, g, b = map(int, color_code)
+        r_value.set(r)
+        g_value.set(g)
+        b_value.set(b)
+        update_from_rgb()
 
-    r = (r_ + m) * 255
-    g = (g_ + m) * 255
-    b = (b_ + m) * 255
+def update_color_display(r, g, b):
+    color_hex = f"#{r:02x}{g:02x}{b:02x}"
+    color_display.config(bg=color_hex)
 
-    return r, g, b
 
-def cmyk_to_hsv(c, m, y, k):
-    return rgb_to_hsv(cmyk_to_rgb(c, m, y, k))
+root = tk.Tk()
+root.geometry("700x500")
+root.title("Color Model Converter")
 
-def hsv_to_cmyk(h, s, v):
-    return rgb_to_cmyk(hsv_to_rgb(h, s, v))
+color_display = tk.Label(root, bg="black", width=20, height=4)
+color_display.grid(row=0, column=0, columnspan=5, padx=5, pady=5)
 
-def update_rgb(*args):
-    r, g, b = r_var.get(), g_var.get(), b_var.get()
-    c, m, y, k = rgb_to_cmyk(r, g, b)
-    h, s, v = rgb_to_hsv(r, g, b)
+#RGB Inputs
+rgb_label = ttk.Label(root, text="RGB:")
+rgb_label.grid(row=1, column=0, padx=5, pady=5, sticky="e")
 
-    # Обновляем значения ползунков
-    c_var.set(c * 100)
-    m_var.set(m * 100)
-    y_var.set(y * 100)
-    k_var.set(k * 100)
+r_value = tk.IntVar()
+g_value = tk.IntVar()
+b_value = tk.IntVar()
 
-    h_var.set(h)
-    s_var.set(s)
-    v_var.set(v)
+r_entry = ttk.Entry(root, textvariable=r_value, width=5)
+r_entry.grid(row=1, column=1, padx=5, pady=5)
 
-def update_cmyk(*args):
-    c, m, y, k = c_var.get() / 100, m_var.get() / 100, y_var.get() / 100, k_var.get() / 100
-    r, g, b = cmyk_to_rgb(c, m, y, k)
-    h, s, v = rgb_to_hsv(r, g, b)
+g_entry = ttk.Entry(root, textvariable=g_value, width=5)
+g_entry.grid(row=1, column=2, padx=5, pady=5)
 
-    r_var.set(r)
-    g_var.set(g)
-    b_var.set(b)
+b_entry = ttk.Entry(root, textvariable=b_value, width=5)
+b_entry.grid(row=1, column=3, padx=5, pady=5)
 
-    h_var.set(h)
-    s_var.set(s)
-    v_var.set(v)
+r_slider = tk.Scale(root, from_=0, to=255, orient="horizontal", variable=r_value, command=lambda _: update_from_rgb())
+r_slider.grid(row=2, column=1, sticky="we", padx=5, pady=5)
 
-def update_hsv(*args):
-    h, s, v = h_var.get(), s_var.get(), v_var.get()
-    r, g, b = hsv_to_rgb(h, s, v)
-    c, m, y, k = rgb_to_cmyk(r, g, b)
+g_slider = tk.Scale(root, from_=0, to=255, orient="horizontal", variable=g_value, command=lambda _: update_from_rgb())
+g_slider.grid(row=2, column=2, sticky="we", padx=5, pady=5)
 
-    r_var.set(r)
-    g_var.set(g)
-    b_var.set(b)
+b_slider = tk.Scale(root, from_=0, to=255, orient="horizontal", variable=b_value, command=lambda _: update_from_rgb())
+b_slider.grid(row=2, column=3, sticky="we", padx=5, pady=5)
 
-    c_var.set(c * 100)
-    m_var.set(m * 100)
-    y_var.set(y * 100)
-    k_var.set(k * 100)
+# CMYK Inputs
+cmyk_label = ttk.Label(root, text="CMYK:")
+cmyk_label.grid(row=3, column=0, padx=5, pady=5, sticky="e")
 
-def choose_rgb_color():
-    color_code = colorchooser.askcolor(title="Выберите цвет (RGB)")
-    if color_code[0]:  # Если пользователь выбрал цвет
-        r, g, b = int(color_code[0][0]), int(color_code[0][1]), int(color_code[0][2])
-        r_var.set(r)
-        g_var.set(g)
-        b_var.set(b)
+c_value = tk.DoubleVar()
+m_value = tk.DoubleVar()
+y_value = tk.DoubleVar()
+k_value = tk.DoubleVar()
 
-        update_rgb()
+c_entry = ttk.Entry(root, textvariable=c_value, width=5)
+c_entry.grid(row=3, column=1, padx=5, pady=5)
 
-def choose_cmyk_color():
-    color_code = colorchooser.askcolor(title="Выберите цвет (CMYK)")
-    if color_code[0]:  # Если пользователь выбрал цвет
-        r, g, b = int(color_code[0][0]), int(color_code[0][1]), int(color_code[0][2])
-        c, m, y, k = rgb_to_cmyk(r, g, b)
-        c_var.set(c * 100)
-        m_var.set(m * 100)
-        y_var.set(y * 100)
-        k_var.set(k * 100)
+m_entry = ttk.Entry(root, textvariable=m_value, width=5)
+m_entry.grid(row=3, column=2, padx=5, pady=5)
 
-        update_cmyk()
+y_entry = ttk.Entry(root, textvariable=y_value, width=5)
+y_entry.grid(row=3, column=3, padx=5, pady=5)
 
-def choose_hsv_color():
-    color_code = colorchooser.askcolor(title="Выберите цвет (HSV)")
-    if color_code[0]:  # Если пользователь выбрал цвет
-        r, g, b = int(color_code[0][0]), int(color_code[0][1]), int(color_code[0][2])
-        h, s, v = rgb_to_hsv(r, g, b)
-        h_var.set(h)
-        s_var.set(s * 100)
-        v_var.set(v * 100)
+k_entry = ttk.Entry(root, textvariable=k_value, width=5)
+k_entry.grid(row=3, column=4, padx=5, pady=5)
 
-        update_hsv()
+c_slider = tk.Scale(root, from_=0, to=1, resolution=0.01, orient="horizontal", variable=c_value, command=lambda _: update_from_cmyk())
+c_slider.grid(row=4, column=1, sticky="we", padx=5, pady=5)
 
-# Привязываем обновление к переменным
-r_var.trace("w", update_rgb)
-g_var.trace("w", update_rgb)
-b_var.trace("w", update_rgb)
+m_slider = tk.Scale(root, from_=0, to=1, resolution=0.01, orient="horizontal", variable=m_value, command=lambda _: update_from_cmyk())
+m_slider.grid(row=4, column=2, sticky="we", padx=5, pady=5)
 
-c_var.trace("w", update_cmyk)
-m_var.trace("w", update_cmyk)
-y_var.trace("w", update_cmyk)
-k_var.trace("w", update_cmyk)
+y_slider = tk.Scale(root, from_=0, to=1, resolution=0.01, orient="horizontal", variable=y_value, command=lambda _: update_from_cmyk())
+y_slider.grid(row=4, column=3, sticky="we", padx=5, pady=5)
 
-h_var.trace("w", update_hsv)
-s_var.trace("w", update_hsv)
-v_var.trace("w", update_hsv)
+k_slider = tk.Scale(root, from_=0, to=1, resolution=0.01, orient="horizontal", variable=k_value, command=lambda _: update_from_cmyk())
+k_slider.grid(row=4, column=4, sticky="we", padx=5, pady=5)
 
-# Создаем ползунки
-r_scalar = Scale(root, variable=r_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - R')
-g_scalar = Scale(root, variable=g_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - G')
-b_scalar = Scale(root, variable=b_var, from_=0, to=255, orient=HORIZONTAL, label='RGB - B')
-c_scalar = Scale(root, variable=c_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - C')
-m_scalar = Scale(root, variable=m_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - M')
-y_scalar = Scale(root, variable=y_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - Y')
-k_scalar = Scale(root, variable=k_var, from_=0, to=100, orient=HORIZONTAL, label='CMYK - K')
-h_scalar = Scale(root, variable=h_var, from_=0, to=360, orient=HORIZONTAL, label='HSV - H')
-s_scalar = Scale(root, variable=s_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - S')
-v_scalar = Scale(root, variable=v_var, from_=0, to=100, orient=HORIZONTAL, label='HSV - V')
+# HSV Inputs
+hsv_label = ttk.Label(root, text="HSV:")
+hsv_label.grid(row=5, column=0, padx=5, pady=5, sticky="e")
 
-# Добавляем поля ввода для каждого цвета
-r_entry = Entry(root, textvariable=r_var)
-g_entry = Entry(root, textvariable=g_var)
-b_entry = Entry(root, textvariable=b_var)
-c_entry = Entry(root, textvariable=c_var)
-m_entry = Entry(root, textvariable=m_var)
-y_entry = Entry(root, textvariable=y_var)
-k_entry = Entry(root, textvariable=k_var)
-h_entry = Entry(root, textvariable=h_var)
-s_entry = Entry(root, textvariable=s_var)
-v_entry = Entry(root, textvariable=v_var)
+h_value = tk.DoubleVar()
+s_value = tk.DoubleVar()
+v_value = tk.DoubleVar()
 
-# Кнопки для выбора цвета
-rgb_button = Button(root, text="Выбрать цвет RGB", command=choose_rgb_color)
-cmyk_button = Button(root, text="Выбрать цвет CMYK", command=choose_cmyk_color)
-hsv_button = Button(root, text="Выбрать цвет HSV", command=choose_hsv_color)
+h_entry = ttk.Entry(root, textvariable=h_value, width=5)
+h_entry.grid(row=5, column=1, padx=5, pady=5)
 
-# Расположение элементов на экране
-r_scalar.pack()
-g_scalar.pack()
-b_scalar.pack()
-rgb_button.pack()
+s_entry = ttk.Entry(root, textvariable=s_value, width=5)
+s_entry.grid(row=5, column=2, padx=5, pady=5)
 
-c_scalar.pack()
-m_scalar.pack()
-y_scalar.pack()
-k_scalar.pack()
-cmyk_button.pack()
+v_entry = ttk.Entry(root, textvariable=v_value, width=5)
+v_entry.grid(row=5, column=3, padx=5, pady=5)
 
-h_scalar.pack()
-s_scalar.pack()
-v_scalar.pack()
-hsv_button.pack()
+h_slider = tk.Scale(root, from_=0, to=360, orient="horizontal", variable=h_value, command=lambda _: update_from_hsv())
+h_slider.grid(row=6, column=1, sticky="we", padx=5, pady=5)
 
-r_entry.pack()
-g_entry.pack()
-b_entry.pack()
+s_slider = tk.Scale(root, from_=0, to=100, orient="horizontal", variable=s_value, command=lambda _: update_from_hsv())
+s_slider.grid(row=6, column=2, sticky="we", padx=5, pady=5)
 
-c_entry.pack()
-m_entry.pack()
-y_entry.pack()
-k_entry.pack()
+v_slider = tk.Scale(root, from_=0, to=100, orient="horizontal", variable=v_value, command=lambda _: update_from_hsv())
+v_slider.grid(row=6, column=3, sticky="we", padx=5, pady=5)
 
-h_entry.pack()
-s_entry.pack()
-v_entry.pack()
+choose_color_button = ttk.Button(root, text="Choose Color", command=choose_color)
+choose_color_button.grid(row=7, column=0, pady=10)
 
-# Запускаем главный цикл
+
+r_entry.bind("<KeyRelease>", lambda event: update_from_rgb())
+g_entry.bind("<KeyRelease>", lambda event: update_from_rgb())
+b_entry.bind("<KeyRelease>", lambda event: update_from_rgb())
+
+c_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
+m_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
+y_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
+k_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
+
+h_entry.bind("<KeyRelease>", lambda event: update_from_hsv())
+s_entry.bind("<KeyRelease>", lambda event: update_from_hsv())
+v_entry.bind("<KeyRelease>", lambda event: update_from_hsv())
+
 root.mainloop()
