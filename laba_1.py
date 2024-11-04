@@ -3,6 +3,8 @@ from tkinter import colorchooser
 from tkinter import ttk
 import colorsys
 
+
+
 def update_from_rgb():
     r = r_value.get()
     g = g_value.get()
@@ -85,7 +87,7 @@ def cmyk_to_rgb(c, m, y, k):
 
 def rgb_to_hsv(r, g, b):
     h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
-    return round(h * 360, 2), round(s * 100, 2), round(v * 100, 2)
+    return int(h * 360), int(s * 100), int(v * 100)
 
 def hsv_to_rgb(h, s, v):
     r, g, b = colorsys.hsv_to_rgb(h / 360, s / 100, v / 100)
@@ -175,9 +177,9 @@ k_slider.grid(row=4, column=4, sticky="we", padx=5, pady=5)
 hsv_label = ttk.Label(root, text="HSV:")
 hsv_label.grid(row=5, column=0, padx=5, pady=5, sticky="e")
 
-h_value = tk.DoubleVar()
-s_value = tk.DoubleVar()
-v_value = tk.DoubleVar()
+h_value = tk.IntVar()
+s_value = tk.IntVar()
+v_value = tk.IntVar()
 
 h_entry = ttk.Entry(root, textvariable=h_value, width=5)
 h_entry.grid(row=5, column=1, padx=5, pady=5)
@@ -201,17 +203,17 @@ choose_color_button = ttk.Button(root, text="Choose Color", command=choose_color
 choose_color_button.grid(row=7, column=0, pady=10)
 
 
-r_entry.bind("<KeyRelease>", lambda event: update_from_rgb())
-g_entry.bind("<KeyRelease>", lambda event: update_from_rgb())
-b_entry.bind("<KeyRelease>", lambda event: update_from_rgb())
+r_entry.bind("<KeyRelease>", lambda event: int(update_from_rgb()))
+g_entry.bind("<KeyRelease>", lambda event: int(update_from_rgb()))
+b_entry.bind("<KeyRelease>", lambda event: int(update_from_rgb()))
 
 c_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
 m_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
 y_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
 k_entry.bind("<KeyRelease>", lambda event: update_from_cmyk())
 
-h_entry.bind("<KeyRelease>", lambda event: update_from_hsv())
-s_entry.bind("<KeyRelease>", lambda event: update_from_hsv())
-v_entry.bind("<KeyRelease>", lambda event: update_from_hsv())
+h_entry.bind("<KeyRelease>", lambda event: int(update_from_hsv()))
+s_entry.bind("<KeyRelease>", lambda event: int(update_from_hsv()))
+v_entry.bind("<KeyRelease>", lambda event: int(update_from_hsv()))
 
 root.mainloop()
