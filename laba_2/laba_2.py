@@ -4,10 +4,8 @@ from tkinter import filedialog, Tk, Button, Label, Frame, Canvas
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 
-# Размеры окна для отображения изображения
 IMAGE_DISPLAY_SIZE = (400, 400)
 
-# Функция для загрузки изображения
 def load_image():
     global img, img_path
     img_path = filedialog.askopenfilename()
@@ -15,7 +13,6 @@ def load_image():
     resized_img = resize_image(img)
     display_image(resized_img)
 
-# Функция для изменения размера изображения под область отображения
 def resize_image(img):
     height, width = IMAGE_DISPLAY_SIZE
     img_resized = cv2.resize(img, (width, height))
@@ -122,10 +119,10 @@ btn_histogram.pack()
 btn_median = Button(root, text="Медианный фильтр", command=median_filter)
 btn_median.pack()
 
-btn_erosion = Button(root, text="Эрозия", command=morphological_erosion)
+btn_erosion = Button(root, text="Морфологическая эрозия", command=morphological_erosion)
 btn_erosion.pack()
 
-btn_dilation = Button(root, text="Дилатация", command=morphological_dilation)
+btn_dilation = Button(root, text="Морфологическая дилатация", command=morphological_dilation)
 btn_dilation.pack()
 
 root.mainloop()
